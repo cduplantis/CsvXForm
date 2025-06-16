@@ -1,0 +1,56 @@
+Field,Order1,Order2,Order3
+OrderID,ORD-X001,ORD-X002,ORD-X003
+Customer.ID,CUST-001,CUST-002,CUST-003
+Customer.Name,Michael Chen,Sarah Johnson,Raj Patel
+Customer.Email,michael@example.com,sarah@example.com,raj@example.com
+Customer.Phone,555-111-3333,555-222-4444,555-333-5555
+Customer.Address.Street,789 Tech Blvd,456 Market St,123 Main St
+Customer.Address.City,San Francisco,New York,Chicago
+Customer.Address.State,CA,NY,IL
+Customer.Address.ZipCode,94105,10001,60601
+Customer.Address.Country,USA,USA,USA
+Customer.MembershipTier,Gold,Silver,Platinum
+Item[0].SKU,TECH-1001,TECH-2001,TECH-3001
+Item[0].Name,Smartphone Pro,Laptop Ultra,Tablet Max
+Item[0].Price,899.99,1299.99,499.99
+Item[0].Quantity,1,1,2
+Item[0].Warranty.Type,Extended,Basic,Premium
+Item[0].Warranty.DurationMonths,24,12,36
+Item[0].Warranty.Price,79.99,49.99,89.99
+Item[1].SKU,TECH-1002,TECH-2002,TECH-3002
+Item[1].Name,Phone Case,Laptop Bag,Tablet Stand
+Item[1].Price,29.99,59.99,24.99
+Item[1].Quantity,1,1,2
+Item[2].SKU,TECH-1003,,TECH-3003
+Item[2].Name,Screen Protector,,Tablet Charger
+Item[2].Price,14.99,,19.99
+Item[2].Quantity,2,,1
+Item[3].SKU,,,TECH-3004
+Item[3].Name,,,Bluetooth Keyboard
+Item[3].Price,,,69.99
+Item[3].Quantity,,,1
+Tax.State,0.0725,0.08875,0.0625
+Tax.Local,0.0125,0.00375,0.0175
+Tax.Special,0.005,0.00125,0
+ShippingInfo.Method,Express,Standard,Overnight
+ShippingInfo.Carrier,FedEx,UPS,DHL
+ShippingInfo.Cost,15.99,9.99,29.99
+ShippingInfo.EstimatedDays,2,5,1
+Discount.Code,TECH15,WELCOME25,LOYALTY10
+Discount.Type,Percentage,Fixed,Percentage
+Discount.Amount,15,50,10
+Discount.AppliedTo,All Items,Laptop Only,All Items
+PaymentInfo.Method,Credit Card,PayPal,Credit Card
+PaymentInfo.TransactionID,TX-45678901,TX-56789012,TX-67890123
+PaymentInfo.Status,Approved,Approved,Approved
+PaymentInfo.Last4Digits,4567,N/A,7890
+SubtotalAmount,1039.95,1409.97,759.93
+TaxAmount,93.60,133.07,60.79
+ShippingAmount,15.99,9.99,29.99
+DiscountAmount,155.99,50.00,75.99
+TotalAmount,993.55,1503.03,774.72
+OrderDate,2025-03-05,2025-03-12,2025-03-18
+OrderTime,09:30:15,14:45:22,11:15:37
+Status,Delivered,Processing,Shipped
+TrackingNumber,FDX7891234565,UPS4567891230,DHL1234567890
+Notes,Gift wrapping requested,Call before delivery,Leave at doorstep

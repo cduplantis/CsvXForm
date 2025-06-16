@@ -1,0 +1,34 @@
+Field,Order1,Order2
+OrderID,ORD001,ORD002
+OrderDateTime,2025-06-16T09:00:00,2025-06-16T10:00:00
+Customer.Id,CUST001,CUST002
+Customer.Name,John Doe,Jane Smith
+Customer.Address,123 Main St,456 Oak St
+Customer.State,TX,TX
+Customer.City,Austin,Dallas
+Customer.Zip,78701,75201
+DeliveryAddress.Name,Jane Doe,John Smith
+DeliveryAddress.Address,456 Elm St,789 Pine St
+DeliveryAddress.State,TX,TX
+DeliveryAddress.City,Austin,Dallas
+DeliveryAddress.Zip,78702,75202
+Item[0].SKU,SKU001,SKU003
+Item[0].Quantity,2,1
+Item[0].Price,10.00,20.00
+Item[0].LineSubTotal,20.00,20.00
+Item[0].LineTax[0].Jurisdiction,State,State
+Item[0].LineTax[0].Amount,1.00,1.50
+Item[0].LineTaxTotal,1.00,1.50
+Item[0].LineTotal,21.00,21.50
+Item[1].SKU,SKU002,
+Item[1].Quantity,1,
+Item[1].Price,15.00,
+Item[1].LineSubTotal,15.00,
+Item[1].LineTax[0].Jurisdiction,State,
+Item[1].LineTax[0].Amount,0.75,
+Item[1].LineTaxTotal,0.75,
+Item[1].LineTotal,15.75,
+TotalDue,37.50,21.50
+InitialDue,10.00,5.00
+Terms,Net30,Net15
+Notes,Urgent delivery,Standard

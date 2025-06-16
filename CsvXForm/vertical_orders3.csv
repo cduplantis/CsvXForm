@@ -1,0 +1,27 @@
+Field,Order1,Order2,Order3,Order4
+OrderID,ORD100,ORD200,ORD300,ORD400
+Customer.Name,Alice Brown,Bob Wilson,Carol Davis,David Miller
+Customer.Email,alice@example.com,bob@example.com,carol@example.com,david@example.com
+Customer.Phone,555-111-2222,555-333-4444,555-555-6666,555-777-8888
+Customer.Address.Street,123 Oak St,456 Pine Ave,789 Maple Dr,101 Cedar Ln
+Customer.Address.City,Boston,Chicago,Seattle,Austin
+Customer.Address.State,MA,IL,WA,TX
+Customer.Address.ZipCode,02108,60601,98101,78701
+Item[0].SKU,SKU101,SKU201,SKU301,SKU401
+Item[0].Name,Premium Widget,Deluxe Gadget,Super Tool,Mega Kit
+Item[0].Price,29.99,49.99,34.99,79.99
+Item[0].Quantity,1,2,3,1
+Item[1].SKU,SKU102,SKU202,SKU302,SKU402
+Item[1].Name,Basic Adapter,Standard Case,Power Cable,User Manual
+Item[1].Price,9.99,19.99,14.99,5.99
+Item[1].Quantity,2,1,2,1
+Tax.State,0.0625,0.0625,0.065,0.0825
+Tax.Local,0.0125,0.0275,0.035,0.01
+ShippingCost,5.99,0,7.99,12.99
+Discount.Code,WELCOME10,RETURN15,NONE,HOLIDAY20
+Discount.Amount,5.00,12.74,0,19.60
+TotalAmount,51.46,83.22,140.94,86.37
+OrderDate,2025-02-10,2025-02-15,2025-02-20,2025-02-25
+ShippingMethod,Standard,Express,Standard,Overnight
+PaymentMethod,Credit Card,PayPal,Credit Card,Crypto
+Status,Delivered,Shipped,Processing,Pending
