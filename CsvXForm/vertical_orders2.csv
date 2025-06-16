@@ -1,0 +1,12 @@
+Field,Order1,Order2
+OrderID,ORD001,ORD002
+Customer.Name,John Doe,Jane Smith
+Customer.Email,john@example.com,jane@example.com
+Customer.Phone,555-123-4567,555-987-6543
+Item[0].SKU,SKU001,SKU003
+Item[0].Name,Widget A,Gadget X
+Item[0].Price,19.99,24.99
+Item[0].Quantity,2,1
+TotalAmount,39.98,24.99
+OrderDate,2025-01-15,2025-01-16
+ShippingMethod,Standard,Express

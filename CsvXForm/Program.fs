@@ -1,5 +1,4 @@
-﻿// This code reads a horizontal CSV file where each line is a separate order,
-// transforms it into a structured format, and displays it.
+// This code reads a vertical CSV file, transforms it into a structured format, and displays it in a horizontal table format.
 
 module Models =
 
@@ -47,129 +46,245 @@ module CsvXForm =
     open FSharp.Data
     open System
     open System.Text.RegularExpressions
-    open System.Collections.Generic
 
     // Load CSV file dynamically
     let loadCsv (filePath: string) =
         CsvFile.Load(filePath, hasHeaders = true)
 
-    let readHorizontalCsv (filePath: string) : Order list =
+    let readVerticalCsv (filePath: string) : Order list =
         let csv = loadCsv filePath
         let headers = csv.Headers |> Option.defaultValue [||]
+        let orderCount = headers.Length - 1 // Exclude "Field" column
         let rows = csv.Rows |> Seq.toList
 
-        // Process each row as a complete order
+        // Initialize orders
         let orders =
-            rows
-            |> List.map (fun row ->
-                // Create a dictionary for easy field lookup
-                let fields = Dictionary<string, string>()
-
-                for i = 0 to headers.Length - 1 do
-                    if i < row.Columns.Length then
-                        fields.[headers.[i]] <- row.Columns.[i]
-                    else
-                        fields.[headers.[i]] <- ""
-
-                // Helper function to safely get field value
-                let getField (key: string) =
-                    match fields.TryGetValue(key) with
-                    | true, value -> value
-                    | _ -> ""
-
-                // Helper function to parse decimal safely
-                let parseDecimal (s: string) =
-                    match Decimal.TryParse(s) with
-                    | true, value -> value
-                    | _ -> 0M
-
-                // Helper function to parse integer safely
-                let parseInt (s: string) =
-                    match Int32.TryParse(s) with
-                    | true, value -> value
-                    | _ -> 0
-
-                // Helper function to parse DateTime safely
-                let parseDateOnly (s: string) =
-                    match DateOnly.TryParse(s) with
-                    | true, value -> value
-                    | _ -> DateOnly.MinValue
-
-                // Extract items from the row
-                let items =
-                    let mutable i = 0
-                    let mutable items = []
-                    let mutable continueProcessing = true
-
-                    while continueProcessing do
-                        let skuKey = sprintf "Item[%d].SKU" i
-
-                        if fields.ContainsKey(skuKey) && not (String.IsNullOrWhiteSpace(fields.[skuKey])) then
-                            // Process taxes for this item
-                            let taxes =
-                                let mutable j = 0
-                                let mutable taxes = []
-                                let mutable continueTaxProcessing = true
-
-                                while continueTaxProcessing do
-                                    let jurisdictionKey = sprintf "Item[%d].LineTax[%d].Jurisdiction" i j
-                                    let amountKey = sprintf "Item[%d].LineTax[%d].Amount" i j
-
-                                    if
-                                        fields.ContainsKey(jurisdictionKey)
-                                        && not (String.IsNullOrWhiteSpace(fields.[jurisdictionKey]))
-                                    then
-                                        taxes <-
-                                            taxes
-                                            @ [ { Jurisdiction = getField jurisdictionKey
-                                                  Amount = parseDecimal (getField amountKey) } ]
-
-                                        j <- j + 1
-                                    else
-                                        continueTaxProcessing <- false
-
-                                taxes
-
-                            // Create the item
-                            items <-
-                                items
-                                @ [ { SKU = getField (sprintf "Item[%d].SKU" i)
-                                      Quantity = parseInt (getField (sprintf "Item[%d].Quantity" i))
-                                      Price = parseDecimal (getField (sprintf "Item[%d].Price" i))
-                                      LineSubTotal = parseDecimal (getField (sprintf "Item[%d].LineSubTotal" i))
-                                      LineTaxes = taxes
-                                      LineTaxTotal = parseDecimal (getField (sprintf "Item[%d].LineTaxTotal" i))
-                                      LineTotal = parseDecimal (getField (sprintf "Item[%d].LineTotal" i)) } ]
-
-                            i <- i + 1
-                        else
-                            continueProcessing <- false
-
-                    items
-
-                // Create and return the order
-                { OrderID = getField "OrderID"
-                  OrderDate = parseDateOnly (getField "OrderDate")
+            Array.init orderCount (fun _ ->
+                { OrderID = ""
+                  OrderDate = DateOnly.MinValue
                   Customer =
-                    { Id = getField "Customer.Id"
-                      Name = getField "Customer.Name"
-                      Street = getField "Customer.Street"
-                      State = getField "Customer.State"
-                      City = getField "Customer.City"
-                      Zip = getField "Customer.Zip" }
+                    { Id = ""
+                      Name = ""
+                      Street = ""
+                      State = ""
+                      City = ""
+                      Zip = "" }
                   DeliveryAddress =
-                    { Name = getField "DeliveryAddress.Name"
-                      Street = getField "DeliveryAddress.Street"
-                      State = getField "DeliveryAddress.State"
-                      City = getField "DeliveryAddress.City"
-                      Zip = getField "DeliveryAddress.Zip" }
-                  Items = items
-                  TotalDue = parseDecimal (getField "TotalDue")
-                  InitialDue = parseDecimal (getField "InitialDue")
-                  Terms = getField "Terms"
-                  Notes = getField "Notes" })
+                    { Name = ""
+                      Street = ""
+                      State = ""
+                      City = ""
+                      Zip = "" }
+                  Items = []
+                  TotalDue = 0M
+                  InitialDue = 0M
+                  Terms = ""
+                  Notes = "" })
 
-        orders
+        // Parse rows
+        rows
+        |> List.iter (fun row ->
+            let rowValues = row.Columns
+            let fieldName = rowValues.[0] // The "Field" column
+
+            for i in 0 .. orderCount - 1 do
+                if i + 1 < rowValues.Length then
+                    let value = rowValues.[i + 1]
+
+                    if not (String.IsNullOrEmpty value) then
+                        let order = orders.[i]
+
+                        match fieldName with
+                        | "OrderID" -> orders.[i] <- { order with OrderID = value }
+                        | "OrderDate" ->
+                            orders.[i] <-
+                                { order with
+                                    OrderDate = DateOnly.Parse(value) }
+                        | "Customer.Id" ->
+                            orders.[i] <-
+                                { order with
+                                    Customer = { order.Customer with Id = value } }
+                        | "Customer.Name" ->
+                            orders.[i] <-
+                                { order with
+                                    Customer = { order.Customer with Name = value } }
+                        | "Customer.Street" ->
+                            orders.[i] <-
+                                { order with
+                                    Customer = { order.Customer with Street = value } }
+                        | "Customer.State" ->
+                            orders.[i] <-
+                                { order with
+                                    Customer = { order.Customer with State = value } }
+                        | "Customer.City" ->
+                            orders.[i] <-
+                                { order with
+                                    Customer = { order.Customer with City = value } }
+                        | "Customer.Zip" ->
+                            orders.[i] <-
+                                { order with
+                                    Customer = { order.Customer with Zip = value } }
+                        | "DeliveryAddress.Name" ->
+                            orders.[i] <-
+                                { order with
+                                    DeliveryAddress =
+                                        { order.DeliveryAddress with
+                                            Name = value } }
+                        | "DeliveryAddress.Address" ->
+                            orders.[i] <-
+                                { order with
+                                    DeliveryAddress =
+                                        { order.DeliveryAddress with
+                                            Street = value } }
+                        | "DeliveryAddress.State" ->
+                            orders.[i] <-
+                                { order with
+                                    DeliveryAddress =
+                                        { order.DeliveryAddress with
+                                            State = value } }
+                        | "DeliveryAddress.City" ->
+                            orders.[i] <-
+                                { order with
+                                    DeliveryAddress =
+                                        { order.DeliveryAddress with
+                                            City = value } }
+                        | "DeliveryAddress.Zip" ->
+                            orders.[i] <-
+                                { order with
+                                    DeliveryAddress =
+                                        { order.DeliveryAddress with
+                                            Zip = value } }
+                        | "TotalDue" -> orders.[i] <- { order with TotalDue = decimal value }
+                        | "InitialDue" ->
+                            orders.[i] <-
+                                { order with
+                                    InitialDue = decimal value }
+                        | "Terms" -> orders.[i] <- { order with Terms = value }
+                        | "Notes" -> orders.[i] <- { order with Notes = value }
+                        | field when Regex.IsMatch(field, @"Item\[\d+\]\.") ->
+                            let itemMatch = Regex.Match(field, @"Item\[(\d+)\]\.(.+)")
+                            let itemIndex = int itemMatch.Groups.[1].Value
+                            let itemField = itemMatch.Groups.[2].Value
+
+                            // Ensure item exists
+                            while orders.[i].Items.Length <= itemIndex do
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            @ [ { SKU = ""
+                                                  Quantity = 0
+                                                  Price = 0M
+                                                  LineSubTotal = 0M
+                                                  LineTaxes = []
+                                                  LineTaxTotal = 0M
+                                                  LineTotal = 0M } ] }
+
+                            let item = orders.[i].Items.[itemIndex]
+
+                            match itemField with
+                            | "SKU" ->
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            |> List.mapi (fun j it ->
+                                                if j = itemIndex then { it with SKU = value } else it) }
+                            | "Quantity" ->
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            |> List.mapi (fun j it ->
+                                                if j = itemIndex then
+                                                    { it with Quantity = int value }
+                                                else
+                                                    it) }
+                            | "Price" ->
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            |> List.mapi (fun j it ->
+                                                if j = itemIndex then
+                                                    { it with Price = decimal value }
+                                                else
+                                                    it) }
+                            | "LineSubTotal" ->
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            |> List.mapi (fun j it ->
+                                                if j = itemIndex then
+                                                    { it with LineSubTotal = decimal value }
+                                                else
+                                                    it) }
+                            | "LineTaxTotal" ->
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            |> List.mapi (fun j it ->
+                                                if j = itemIndex then
+                                                    { it with LineTaxTotal = decimal value }
+                                                else
+                                                    it) }
+                            | "LineTotal" ->
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            |> List.mapi (fun j it ->
+                                                if j = itemIndex then
+                                                    { it with LineTotal = decimal value }
+                                                else
+                                                    it) }
+                            | field when Regex.IsMatch(field, @"LineTax\[\d+\]\.") ->
+                                let taxMatch = Regex.Match(field, @"LineTax\[(\d+)\]\.(.+)")
+                                let taxIndex = int taxMatch.Groups.[1].Value
+                                let taxField = taxMatch.Groups.[2].Value
+
+                                // Ensure tax exists
+                                let updatedItem =
+                                    if item.LineTaxes.Length <= taxIndex then
+                                        { item with
+                                            LineTaxes =
+                                                item.LineTaxes
+                                                @ List.replicate
+                                                    (taxIndex - item.LineTaxes.Length + 1)
+                                                    { Jurisdiction = ""; Amount = 0M } }
+                                    else
+                                        item
+
+                                let updatedTax =
+                                    match taxField with
+                                    | "Jurisdiction" ->
+                                        { updatedItem.LineTaxes.[taxIndex] with
+                                            Jurisdiction = value }
+                                    | "Amount" ->
+                                        { updatedItem.LineTaxes.[taxIndex] with
+                                            Amount = decimal value }
+                                    | _ -> updatedItem.LineTaxes.[taxIndex]
+
+                                orders.[i] <-
+                                    { order with
+                                        Items =
+                                            orders.[i].Items
+                                            |> List.mapi (fun j it ->
+                                                if j = itemIndex then
+                                                    { updatedItem with
+                                                        LineTaxes =
+                                                            updatedItem.LineTaxes
+                                                            |> List.mapi (fun k t ->
+                                                                if k = taxIndex then updatedTax else t) }
+                                                else
+                                                    it) }
+                            | _ -> ()
+                        | _ -> ())
+
+        orders |> Array.toList
+
 
     let displayHorizontalTable (orders: Order list) =
         // Collect all unique field names
@@ -285,7 +400,7 @@ let main argv =
         let filePath = argv.[0]
 
         try
-            let orders = readHorizontalCsv filePath
+            let orders = readVerticalCsv filePath
             displayHorizontalTable orders
             0
         with ex ->
