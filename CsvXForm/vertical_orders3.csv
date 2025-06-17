@@ -9,7 +9,7 @@ Customer.City,Boston,Chicago,Seattle,Austin
 Customer.State,MA,IL,WA,TX
 Customer.Zip,02108,60601,98101,78701
 DeliveryAddress.Name,Alice Brown,Bob Wilson,Carol Davis,David Miller
-DeliveryAddress.Address,123 Oak St,456 Pine Ave,789 Maple Dr,101 Cedar Ln
+DeliveryAddress.Street,123 Oak St,456 Pine Ave,789 Maple Dr,101 Cedar Ln
 DeliveryAddress.City,Boston,Chicago,Seattle,Austin
 DeliveryAddress.State,MA,IL,WA,TX
 DeliveryAddress.Zip,02108,60601,98101,78701

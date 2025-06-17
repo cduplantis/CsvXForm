@@ -155,7 +155,7 @@ module LineTax =
 type Customer =
     { Id: CustomerId
       Name: NonEmptyString
-      Address: NonEmptyString
+      Street: NonEmptyString
       State: UsState
       City: NonEmptyString
       Zip: ZipCode }
@@ -167,7 +167,7 @@ module Customer =
     let create
         (id: string)
         (name: string)
-        (address: string)
+        (street: string)
         (state: string)
         (city: string)
         (zip: string)
@@ -175,7 +175,7 @@ module Customer =
         validated {
             let! validId = CustomerId.create id
             let! validName = NonEmptyString.create name
-            let! validAddress = NonEmptyString.create address
+            let! validStreet = NonEmptyString.create street
             let! validState = UsState.create state
             let! validCity = NonEmptyString.create city
             let! validZip = ZipCode.create zip
@@ -183,7 +183,7 @@ module Customer =
             return
                 { Id = validId
                   Name = validName
-                  Address = validAddress
+                  Street = validStreet
                   State = validState
                   City = validCity
                   Zip = validZip }
@@ -202,10 +202,10 @@ module Customer =
                 | Some v -> Ok v
                 | None -> Error "Customer name is required"
 
-            let! address =
-                match getField fields "Customer.Address" with
+            let! street =
+                match getField fields "Customer.Street" with
                 | Some v -> Ok v
-                | None -> Error "Customer address is required"
+                | None -> Error "Customer street is required"
 
             let! state =
                 match getField fields "Customer.State" with
@@ -222,12 +222,12 @@ module Customer =
                 | Some v -> Ok v
                 | None -> Error "Customer zip is required"
 
-            return! create id name address state city zip
+            return! create id name street state city zip
         }
 
 type DeliveryAddress =
     { Name: string option // Optional, as delivery may not have a specific name
-      Address: NonEmptyString
+      Street: NonEmptyString
       State: UsState
       City: NonEmptyString
       Zip: ZipCode }
@@ -239,20 +239,20 @@ module DeliveryAddress =
     // Pure function to create a DeliveryAddress from explicit parameters
     let create
         (name: string option)
-        (address: string)
+        (street: string)
         (state: string)
         (city: string)
         (zip: string)
         : Result<DeliveryAddress, string> =
         validated {
-            let! validAddress = NonEmptyString.create address
+            let! validStreet = NonEmptyString.create street
             let! validState = UsState.create state
             let! validCity = NonEmptyString.create city
             let! validZip = ZipCode.create zip
 
             return
                 { Name = name
-                  Address = validAddress
+                  Street = validStreet
                   State = validState
                   City = validCity
                   Zip = validZip }
@@ -261,10 +261,10 @@ module DeliveryAddress =
     // Function to extract DeliveryAddress data from a dictionary
     let fromDictionary (fields: Dictionary<string, string>) : Result<DeliveryAddress, string> =
         validated {
-            let! address =
-                match getField fields "DeliveryAddress.Address" with
+            let! street =
+                match getField fields "DeliveryAddress.Street" with
                 | Some v -> Ok v
-                | None -> Error "Delivery address is required"
+                | None -> Error "Delivery street is required"
 
             let! state =
                 match getField fields "DeliveryAddress.State" with
@@ -283,7 +283,7 @@ module DeliveryAddress =
 
             let name = getField fields "DeliveryAddress.Name"
 
-            return! create name address state city zip
+            return! create name street state city zip
         }
 
 type Item =

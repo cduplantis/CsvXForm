@@ -209,12 +209,12 @@ module CsvProcessor =
                     | "OrderDate" -> order.OrderDate.ToString()
                     | "Customer.Id" -> order.Customer.Id |> CustomerId.value
                     | "Customer.Name" -> order.Customer.Name |> NonEmptyString.value
-                    | "Customer.Address" -> order.Customer.Address |> NonEmptyString.value
+                    | "Customer.Street" -> order.Customer.Street |> NonEmptyString.value
                     | "Customer.State" -> order.Customer.State |> UsState.value
                     | "Customer.City" -> order.Customer.City |> NonEmptyString.value
                     | "Customer.Zip" -> order.Customer.Zip |> ZipCode.value
                     | "DeliveryAddress.Name" -> order.DeliveryAddress.Name |> Option.defaultValue ""
-                    | "DeliveryAddress.Address" -> order.DeliveryAddress.Address |> NonEmptyString.value
+                    | "DeliveryAddress.Street" -> order.DeliveryAddress.Street |> NonEmptyString.value
                     | "DeliveryAddress.State" -> order.DeliveryAddress.State |> UsState.value
                     | "DeliveryAddress.City" -> order.DeliveryAddress.City |> NonEmptyString.value
                     | "DeliveryAddress.Zip" -> order.DeliveryAddress.Zip |> ZipCode.value

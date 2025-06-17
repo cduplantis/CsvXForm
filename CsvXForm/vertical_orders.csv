@@ -3,12 +3,12 @@ OrderID,ORD001,ORD002
 OrderDate,2025-06-16T09:00:00,2025-06-16T10:00:00
 Customer.Id,CUST001,CUST002
 Customer.Name,John Doe,Jane Smith
-Customer.Address,123 Main St,456 Oak St
+Customer.Street,123 Main St,456 Oak St
 Customer.State,TX,TX
 Customer.City,Austin,Dallas
 Customer.Zip,78701,75201
 DeliveryAddress.Name,Jane Doe,John Smith
-DeliveryAddress.Address,456 Elm St,789 Pine St
+DeliveryAddress.Street,456 Elm St,789 Pine St
 DeliveryAddress.State,TX,TX
 DeliveryAddress.City,Austin,Dallas
 DeliveryAddress.Zip,78702,75202

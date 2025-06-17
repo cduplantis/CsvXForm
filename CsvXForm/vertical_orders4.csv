@@ -11,7 +11,7 @@ Customer.Zip,94105,10001,60601
 Customer.Country,USA,USA,USA
 Customer.MembershipTier,Gold,Silver,Platinum
 DeliveryAddress.Name,Michael Chen,Sarah Johnson,Raj Patel
-DeliveryAddress.Address,456 Elm St,789 Pine St,123 Main St
+DeliveryAddress.Street,456 Elm St,789 Pine St,123 Main St
 DeliveryAddress.State,CA,NY,IL
 DeliveryAddress.City,San Francisco,New York,Chicago
 DeliveryAddress.Zip,94105,10001,60601
@@ -54,6 +54,8 @@ TaxAmount,93.60,133.07,60.79
 ShippingAmount,15.99,9.99,29.99
 DiscountAmount,155.99,50.00,75.99
 TotalAmount,993.55,1503.03,774.72
+TotalDue,993.55,1503.03,774.72
+InitialDue,993.55,1503.03,774.72
 OrderDate,2025-03-05,2025-03-12,2025-03-18
 OrderTime,09:30:15,14:45:22,11:15:37
 Status,Delivered,Processing,Shipped
