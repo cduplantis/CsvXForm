@@ -19,14 +19,14 @@ module Models =
     type Customer =
         { Id: string
           Name: string
-          Address: string
+          Street: string
           State: string
           City: string
           Zip: string }
 
     type DeliveryAddress =
         { Name: string
-          Address: string
+          Street: string
           State: string
           City: string
           Zip: string }
@@ -153,13 +153,13 @@ module CsvXForm =
                   Customer =
                     { Id = getField "Customer.Id"
                       Name = getField "Customer.Name"
-                      Address = getField "Customer.Address"
+                      Street = getField "Customer.Street"
                       State = getField "Customer.State"
                       City = getField "Customer.City"
                       Zip = getField "Customer.Zip" }
                   DeliveryAddress =
                     { Name = getField "DeliveryAddress.Name"
-                      Address = getField "DeliveryAddress.Address"
+                      Street = getField "DeliveryAddress.Street"
                       State = getField "DeliveryAddress.State"
                       City = getField "DeliveryAddress.City"
                       Zip = getField "DeliveryAddress.Zip" }
@@ -180,12 +180,12 @@ module CsvXForm =
                   yield "OrderDate"
                   yield "Customer.Id"
                   yield "Customer.Name"
-                  yield "Customer.Address"
+                  yield "Customer.Street"
                   yield "Customer.State"
                   yield "Customer.City"
                   yield "Customer.Zip"
                   yield "DeliveryAddress.Name"
-                  yield "DeliveryAddress.Address"
+                  yield "DeliveryAddress.Street"
                   yield "DeliveryAddress.State"
                   yield "DeliveryAddress.City"
                   yield "DeliveryAddress.Zip"
@@ -224,12 +224,12 @@ module CsvXForm =
                     | "OrderDate" -> order.OrderDate.ToString()
                     | "Customer.Id" -> order.Customer.Id
                     | "Customer.Name" -> order.Customer.Name
-                    | "Customer.Address" -> order.Customer.Address
+                    | "Customer.Street" -> order.Customer.Street
                     | "Customer.State" -> order.Customer.State
                     | "Customer.City" -> order.Customer.City
                     | "Customer.Zip" -> order.Customer.Zip
                     | "DeliveryAddress.Name" -> order.DeliveryAddress.Name
-                    | "DeliveryAddress.Address" -> order.DeliveryAddress.Address
+                    | "DeliveryAddress.Street" -> order.DeliveryAddress.Street
                     | "DeliveryAddress.State" -> order.DeliveryAddress.State
                     | "DeliveryAddress.City" -> order.DeliveryAddress.City
                     | "DeliveryAddress.Zip" -> order.DeliveryAddress.Zip
