@@ -4,12 +4,17 @@ Customer.ID,CUST-001,CUST-002,CUST-003
 Customer.Name,Michael Chen,Sarah Johnson,Raj Patel
 Customer.Email,michael@example.com,sarah@example.com,raj@example.com
 Customer.Phone,555-111-3333,555-222-4444,555-333-5555
-Customer.Address.Street,789 Tech Blvd,456 Market St,123 Main St
-Customer.Address.City,San Francisco,New York,Chicago
-Customer.Address.State,CA,NY,IL
-Customer.Address.ZipCode,94105,10001,60601
-Customer.Address.Country,USA,USA,USA
+Customer.Street,789 Tech Blvd,456 Market St,123 Main St
+Customer.City,San Francisco,New York,Chicago
+Customer.State,CA,NY,IL
+Customer.Zip,94105,10001,60601
+Customer.Country,USA,USA,USA
 Customer.MembershipTier,Gold,Silver,Platinum
+DeliveryAddress.Name,Michael Chen,Sarah Johnson,Raj Patel
+DeliveryAddress.Address,456 Elm St,789 Pine St,123 Main St
+DeliveryAddress.State,CA,NY,IL
+DeliveryAddress.City,San Francisco,New York,Chicago
+DeliveryAddress.Zip,94105,10001,60601
 Item[0].SKU,TECH-1001,TECH-2001,TECH-3001
 Item[0].Name,Smartphone Pro,Laptop Ultra,Tablet Max
 Item[0].Price,899.99,1299.99,499.99

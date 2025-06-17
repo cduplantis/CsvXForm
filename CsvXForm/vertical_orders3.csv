@@ -3,10 +3,10 @@ OrderID,ORD100,ORD200,ORD300,ORD400
 Customer.Name,Alice Brown,Bob Wilson,Carol Davis,David Miller
 Customer.Email,alice@example.com,bob@example.com,carol@example.com,david@example.com
 Customer.Phone,555-111-2222,555-333-4444,555-555-6666,555-777-8888
-Customer.Address.Street,123 Oak St,456 Pine Ave,789 Maple Dr,101 Cedar Ln
-Customer.Address.City,Boston,Chicago,Seattle,Austin
-Customer.Address.State,MA,IL,WA,TX
-Customer.Address.ZipCode,02108,60601,98101,78701
+Customer.Street,123 Oak St,456 Pine Ave,789 Maple Dr,101 Cedar Ln
+Customer.City,Boston,Chicago,Seattle,Austin
+Customer.State,MA,IL,WA,TX
+Customer.Zip,02108,60601,98101,78701
 Item[0].SKU,SKU101,SKU201,SKU301,SKU401
 Item[0].Name,Premium Widget,Deluxe Gadget,Super Tool,Mega Kit
 Item[0].Price,29.99,49.99,34.99,79.99
