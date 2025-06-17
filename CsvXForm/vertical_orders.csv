@@ -1,6 +1,6 @@
 Field,Order1,Order2
 OrderID,ORD001,ORD002
-OrderDateTime,2025-06-16T09:00:00,2025-06-16T10:00:00
+OrderDate,2025-06-16T09:00:00,2025-06-16T10:00:00
 Customer.Id,CUST001,CUST002
 Customer.Name,John Doe,Jane Smith
 Customer.Address,123 Main St,456 Oak St

@@ -1,5 +1,6 @@
 Field,Order1,Order2,Order3,Order4
 OrderID,ORD100,ORD200,ORD300,ORD400
+Customer.Id,CUST-001,CUST-002,CUST-003,CUST-004
 Customer.Name,Alice Brown,Bob Wilson,Carol Davis,David Miller
 Customer.Email,alice@example.com,bob@example.com,carol@example.com,david@example.com
 Customer.Phone,555-111-2222,555-333-4444,555-555-6666,555-777-8888
@@ -7,6 +8,11 @@ Customer.Street,123 Oak St,456 Pine Ave,789 Maple Dr,101 Cedar Ln
 Customer.City,Boston,Chicago,Seattle,Austin
 Customer.State,MA,IL,WA,TX
 Customer.Zip,02108,60601,98101,78701
+DeliveryAddress.Name,Alice Brown,Bob Wilson,Carol Davis,David Miller
+DeliveryAddress.Address,123 Oak St,456 Pine Ave,789 Maple Dr,101 Cedar Ln
+DeliveryAddress.City,Boston,Chicago,Seattle,Austin
+DeliveryAddress.State,MA,IL,WA,TX
+DeliveryAddress.Zip,02108,60601,98101,78701
 Item[0].SKU,SKU101,SKU201,SKU301,SKU401
 Item[0].Name,Premium Widget,Deluxe Gadget,Super Tool,Mega Kit
 Item[0].Price,29.99,49.99,34.99,79.99
@@ -20,6 +26,8 @@ Tax.Local,0.0125,0.0275,0.035,0.01
 ShippingCost,5.99,0,7.99,12.99
 Discount.Code,WELCOME10,RETURN15,NONE,HOLIDAY20
 Discount.Amount,5.00,12.74,0,19.60
+InitialDue,51.46,83.22,140.94,86.37
+TotalDue,51.46,83.22,140.94,86.37
 TotalAmount,51.46,83.22,140.94,86.37
 OrderDate,2025-02-10,2025-02-15,2025-02-20,2025-02-25
 ShippingMethod,Standard,Express,Standard,Overnight

@@ -1,290 +1,160 @@
-// This code reads a vertical CSV file, transforms it into a structured format, and displays it in a horizontal table format.
+// This code reads a CSV file, transforms it into a structured format, and displays it.
 
-module Models =
+namespace CsvXForm
 
-    type LineTax =
-        { Jurisdiction: string
-          Amount: decimal }
-
-    type Item =
-        { SKU: string
-          Quantity: int
-          Price: decimal
-          LineSubTotal: decimal
-          LineTaxes: LineTax list
-          LineTaxTotal: decimal
-          LineTotal: decimal }
-
-    type Customer =
-        { Id: string
-          Name: string
-          Street: string
-          State: string
-          City: string
-          Zip: string }
-
-    type DeliveryAddress =
-        { Name: string
-          Street: string
-          State: string
-          City: string
-          Zip: string }
-
-    type Order =
-        { OrderID: string
-          OrderDate: System.DateOnly
-          Customer: Customer
-          DeliveryAddress: DeliveryAddress
-          Items: Item list
-          TotalDue: decimal
-          InitialDue: decimal
-          Terms: string
-          Notes: string }
-
-module CsvXForm =
+module CsvProcessor =
     open Models
     open FSharp.Data
     open System
     open System.Text.RegularExpressions
+    open System.Collections.Generic
 
     // Load CSV file dynamically
     let loadCsv (filePath: string) =
         CsvFile.Load(filePath, hasHeaders = true)
 
-    let readVerticalCsv (filePath: string) : Order list =
-        let csv = loadCsv filePath
-        let headers = csv.Headers |> Option.defaultValue [||]
-        let orderCount = headers.Length - 1 // Exclude "Field" column
-        let rows = csv.Rows |> Seq.toList
 
-        // Initialize orders
-        let orders =
-            Array.init orderCount (fun _ ->
-                { OrderID = ""
-                  OrderDate = DateOnly.MinValue
-                  Customer =
-                    { Id = ""
-                      Name = ""
-                      Street = ""
-                      State = ""
-                      City = ""
-                      Zip = "" }
-                  DeliveryAddress =
-                    { Name = ""
-                      Street = ""
-                      State = ""
-                      City = ""
-                      Zip = "" }
-                  Items = []
-                  TotalDue = 0M
-                  InitialDue = 0M
-                  Terms = ""
-                  Notes = "" })
+    let readHorizontalCsv (filePath: string) : Result<Order list, string> =
+        try
+            let csv = loadCsv filePath
+            let headers = csv.Headers |> Option.defaultValue [||]
 
-        // Parse rows
-        rows
-        |> List.iter (fun row ->
-            let rowValues = row.Columns
-            let fieldName = rowValues.[0] // The "Field" column
+            if headers.Length = 0 then
+                failwith "CSV file has no headers."
 
-            for i in 0 .. orderCount - 1 do
-                if i + 1 < rowValues.Length then
-                    let value = rowValues.[i + 1]
+            // Print headers for debugging
+            printfn "Found headers: %A" headers
 
-                    if not (String.IsNullOrEmpty value) then
-                        let order = orders.[i]
+            let rows = csv.Rows |> Seq.toList
+            printfn "Found %d rows" rows.Length
 
-                        match fieldName with
-                        | "OrderID" -> orders.[i] <- { order with OrderID = value }
-                        | "OrderDate" ->
-                            orders.[i] <-
-                                { order with
-                                    OrderDate = DateOnly.Parse(value) }
-                        | "Customer.Id" ->
-                            orders.[i] <-
-                                { order with
-                                    Customer = { order.Customer with Id = value } }
-                        | "Customer.Name" ->
-                            orders.[i] <-
-                                { order with
-                                    Customer = { order.Customer with Name = value } }
-                        | "Customer.Street" ->
-                            orders.[i] <-
-                                { order with
-                                    Customer = { order.Customer with Street = value } }
-                        | "Customer.State" ->
-                            orders.[i] <-
-                                { order with
-                                    Customer = { order.Customer with State = value } }
-                        | "Customer.City" ->
-                            orders.[i] <-
-                                { order with
-                                    Customer = { order.Customer with City = value } }
-                        | "Customer.Zip" ->
-                            orders.[i] <-
-                                { order with
-                                    Customer = { order.Customer with Zip = value } }
-                        | "DeliveryAddress.Name" ->
-                            orders.[i] <-
-                                { order with
-                                    DeliveryAddress =
-                                        { order.DeliveryAddress with
-                                            Name = value } }
-                        | "DeliveryAddress.Address" ->
-                            orders.[i] <-
-                                { order with
-                                    DeliveryAddress =
-                                        { order.DeliveryAddress with
-                                            Street = value } }
-                        | "DeliveryAddress.State" ->
-                            orders.[i] <-
-                                { order with
-                                    DeliveryAddress =
-                                        { order.DeliveryAddress with
-                                            State = value } }
-                        | "DeliveryAddress.City" ->
-                            orders.[i] <-
-                                { order with
-                                    DeliveryAddress =
-                                        { order.DeliveryAddress with
-                                            City = value } }
-                        | "DeliveryAddress.Zip" ->
-                            orders.[i] <-
-                                { order with
-                                    DeliveryAddress =
-                                        { order.DeliveryAddress with
-                                            Zip = value } }
-                        | "TotalDue" -> orders.[i] <- { order with TotalDue = decimal value }
-                        | "InitialDue" ->
-                            orders.[i] <-
-                                { order with
-                                    InitialDue = decimal value }
-                        | "Terms" -> orders.[i] <- { order with Terms = value }
-                        | "Notes" -> orders.[i] <- { order with Notes = value }
-                        | field when Regex.IsMatch(field, @"Item\[\d+\]\.") ->
-                            let itemMatch = Regex.Match(field, @"Item\[(\d+)\]\.(.+)")
-                            let itemIndex = int itemMatch.Groups.[1].Value
-                            let itemField = itemMatch.Groups.[2].Value
+            // Process each row as an order
+            let orderResults =
+                rows
+                |> List.mapi (fun rowIndex row ->
+                    // Create a dictionary for field lookup
+                    let fields = Dictionary<string, string>()
 
-                            // Ensure item exists
-                            while orders.[i].Items.Length <= itemIndex do
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            @ [ { SKU = ""
-                                                  Quantity = 0
-                                                  Price = 0M
-                                                  LineSubTotal = 0M
-                                                  LineTaxes = []
-                                                  LineTaxTotal = 0M
-                                                  LineTotal = 0M } ] }
+                    for i = 0 to headers.Length - 1 do
+                        if i < row.Columns.Length then
+                            fields.[headers.[i]] <- row.Columns.[i]
 
-                            let item = orders.[i].Items.[itemIndex]
+                    printfn "Row %d - Processing with %d fields" rowIndex fields.Count
 
-                            match itemField with
-                            | "SKU" ->
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            |> List.mapi (fun j it ->
-                                                if j = itemIndex then { it with SKU = value } else it) }
-                            | "Quantity" ->
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            |> List.mapi (fun j it ->
-                                                if j = itemIndex then
-                                                    { it with Quantity = int value }
-                                                else
-                                                    it) }
-                            | "Price" ->
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            |> List.mapi (fun j it ->
-                                                if j = itemIndex then
-                                                    { it with Price = decimal value }
-                                                else
-                                                    it) }
-                            | "LineSubTotal" ->
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            |> List.mapi (fun j it ->
-                                                if j = itemIndex then
-                                                    { it with LineSubTotal = decimal value }
-                                                else
-                                                    it) }
-                            | "LineTaxTotal" ->
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            |> List.mapi (fun j it ->
-                                                if j = itemIndex then
-                                                    { it with LineTaxTotal = decimal value }
-                                                else
-                                                    it) }
-                            | "LineTotal" ->
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            |> List.mapi (fun j it ->
-                                                if j = itemIndex then
-                                                    { it with LineTotal = decimal value }
-                                                else
-                                                    it) }
-                            | field when Regex.IsMatch(field, @"LineTax\[\d+\]\.") ->
-                                let taxMatch = Regex.Match(field, @"LineTax\[(\d+)\]\.(.+)")
-                                let taxIndex = int taxMatch.Groups.[1].Value
-                                let taxField = taxMatch.Groups.[2].Value
+                    // Debug print some key fields
+                    [ "OrderID"; "Customer.Id"; "Customer.Name" ]
+                    |> List.iter (fun key ->
+                        match getField fields key with
+                        | Some value -> printfn "  %s: %s" key value
+                        | None -> printfn "  %s: <missing>" key)
 
-                                // Ensure tax exists
-                                let updatedItem =
-                                    if item.LineTaxes.Length <= taxIndex then
-                                        { item with
-                                            LineTaxes =
-                                                item.LineTaxes
-                                                @ List.replicate
-                                                    (taxIndex - item.LineTaxes.Length + 1)
-                                                    { Jurisdiction = ""; Amount = 0M } }
-                                    else
-                                        item
+                    // Create the order from fields
+                    let orderResult = Order.fromDictionary fields
 
-                                let updatedTax =
-                                    match taxField with
-                                    | "Jurisdiction" ->
-                                        { updatedItem.LineTaxes.[taxIndex] with
-                                            Jurisdiction = value }
-                                    | "Amount" ->
-                                        { updatedItem.LineTaxes.[taxIndex] with
-                                            Amount = decimal value }
-                                    | _ -> updatedItem.LineTaxes.[taxIndex]
+                    // Log the result
+                    match orderResult with
+                    | Ok order ->
+                        printfn
+                            "  Successfully created order with ID: %s, containing %d items"
+                            (OrderId.value order.OrderID)
+                            order.Items.Length
+                    | Error e -> printfn "  Failed to create order: %s" e
 
-                                orders.[i] <-
-                                    { order with
-                                        Items =
-                                            orders.[i].Items
-                                            |> List.mapi (fun j it ->
-                                                if j = itemIndex then
-                                                    { updatedItem with
-                                                        LineTaxes =
-                                                            updatedItem.LineTaxes
-                                                            |> List.mapi (fun k t ->
-                                                                if k = taxIndex then updatedTax else t) }
-                                                else
-                                                    it) }
-                            | _ -> ()
-                        | _ -> ())
+                    orderResult)
 
-        orders |> Array.toList
+            // Count successes and failures
+            let validOrders =
+                orderResults
+                |> List.choose (function
+                    | Ok order -> Some order
+                    | Error _ -> None)
 
+            let errorCount = orderResults.Length - validOrders.Length
+            printfn "Parsed %d valid orders (with %d errors)" validOrders.Length errorCount
+
+            // If we have any valid orders, return them, otherwise return an error
+            if validOrders.Length > 0 then
+                Ok validOrders
+            else
+                let errors =
+                    orderResults
+                    |> List.choose (function
+                        | Ok _ -> None
+                        | Error e -> Some e)
+                    |> String.concat "; "
+
+                Error $"Failed to parse any valid orders: {errors}"
+
+        with ex ->
+            Error $"Error reading CSV: {ex.Message}\n{ex.StackTrace}"
+
+    let readVerticalCsv (filePath: string) : Result<Order list, string> =
+        try
+            let csv = loadCsv filePath
+            let rows = csv.Rows |> Seq.toList
+
+            // Determine how many orders we have by looking at the header row
+            let headers = csv.Headers |> Option.defaultValue [||]
+
+            if headers.Length <= 1 then
+                Error "CSV file doesn't contain order columns"
+            else
+                let orderCount = headers.Length - 1 // Subtract 1 for the "Field" column
+                printfn "Found %d orders in vertical CSV" orderCount
+
+                // Convert the rows into a dictionary mapping field names to values for each order
+                let orderDictionaries =
+                    [ for orderIndex in 1..orderCount do
+                          let orderDict = Dictionary<string, string>()
+
+                          // Fill the dictionary with values from each row
+                          for row in rows do
+                              if row.Columns.Length > orderIndex then
+                                  let fieldName = row.Columns.[0] // Field name is in first column
+                                  let value = row.Columns.[orderIndex] // Order value is in column by index
+                                  orderDict.[fieldName] <- value
+
+                          yield orderDict ]
+
+                // Process each order dictionary
+                let orderResults =
+                    orderDictionaries
+                    |> List.mapi (fun i dict ->
+                        printfn "Processing order %d with %d fields" (i + 1) dict.Count
+
+                        // Debug print some key fields
+                        [ "OrderID"; "Customer.Id"; "Customer.Name" ]
+                        |> List.iter (fun key ->
+                            match getField dict key with
+                            | Some value -> printfn "  %s: %s" key value
+                            | None -> printfn "  %s: <missing>" key)
+
+                        Order.fromDictionary dict)
+
+                // Process results
+                let validOrders =
+                    orderResults
+                    |> List.choose (function
+                        | Ok order -> Some order
+                        | Error _ -> None)
+
+                let errorCount = orderResults.Length - validOrders.Length
+                printfn "Parsed %d valid orders (with %d errors)" validOrders.Length errorCount
+
+                if validOrders.Length > 0 then
+                    Ok validOrders
+                else
+                    let errors =
+                        orderResults
+                        |> List.choose (function
+                            | Ok _ -> None
+                            | Error e -> Some e)
+                        |> String.concat "; "
+
+                    Error $"Failed to parse any valid orders: {errors}"
+
+        with ex ->
+            Error $"Error reading CSV: {ex.Message}\n{ex.StackTrace}"
 
     let displayHorizontalTable (orders: Order list) =
         // Collect all unique field names
@@ -335,23 +205,28 @@ module CsvXForm =
             for order in orders do
                 let value =
                     match field with
-                    | "OrderID" -> order.OrderID
+                    | "OrderID" -> order.OrderID |> OrderId.value
                     | "OrderDate" -> order.OrderDate.ToString()
-                    | "Customer.Id" -> order.Customer.Id
-                    | "Customer.Name" -> order.Customer.Name
-                    | "Customer.Street" -> order.Customer.Street
-                    | "Customer.State" -> order.Customer.State
-                    | "Customer.City" -> order.Customer.City
-                    | "Customer.Zip" -> order.Customer.Zip
-                    | "DeliveryAddress.Name" -> order.DeliveryAddress.Name
-                    | "DeliveryAddress.Street" -> order.DeliveryAddress.Street
-                    | "DeliveryAddress.State" -> order.DeliveryAddress.State
-                    | "DeliveryAddress.City" -> order.DeliveryAddress.City
-                    | "DeliveryAddress.Zip" -> order.DeliveryAddress.Zip
-                    | "TotalDue" -> order.TotalDue.ToString("F2")
-                    | "InitialDue" -> order.InitialDue.ToString("F2")
-                    | "Terms" -> order.Terms
-                    | "Notes" -> order.Notes
+                    | "Customer.Id" -> order.Customer.Id |> CustomerId.value
+                    | "Customer.Name" -> order.Customer.Name |> NonEmptyString.value
+                    | "Customer.Address" -> order.Customer.Address |> NonEmptyString.value
+                    | "Customer.State" -> order.Customer.State |> UsState.value
+                    | "Customer.City" -> order.Customer.City |> NonEmptyString.value
+                    | "Customer.Zip" -> order.Customer.Zip |> ZipCode.value
+                    | "DeliveryAddress.Name" -> order.DeliveryAddress.Name |> Option.defaultValue ""
+                    | "DeliveryAddress.Address" -> order.DeliveryAddress.Address |> NonEmptyString.value
+                    | "DeliveryAddress.State" -> order.DeliveryAddress.State |> UsState.value
+                    | "DeliveryAddress.City" -> order.DeliveryAddress.City |> NonEmptyString.value
+                    | "DeliveryAddress.Zip" -> order.DeliveryAddress.Zip |> ZipCode.value
+                    | "TotalDue" -> order.TotalDue |> NonNegativeDecimal.value |> sprintf "%.2f"
+                    | "InitialDue" -> order.InitialDue |> NonNegativeDecimal.value |> sprintf "%.2f"
+                    | "Terms" ->
+                        order.Terms
+                        |> function
+                            | Net days -> sprintf "Net %d" (PositiveInt.value days)
+                            | DueOnReceipt -> "Due On Receipt"
+                            | Custom note -> NonEmptyString.value note
+                    | "Notes" -> order.Notes |> Option.defaultValue ""
                     | field when Regex.IsMatch(field, @"Item\[\d+\]\.") ->
                         let itemMatch = Regex.Match(field, @"Item\[(\d+)\]\.(.+)")
                         let itemIndex = int itemMatch.Groups.[1].Value
@@ -360,12 +235,12 @@ module CsvXForm =
                             let item = order.Items.[itemIndex]
 
                             match itemMatch.Groups.[2].Value with
-                            | "SKU" -> item.SKU
-                            | "Quantity" -> item.Quantity.ToString()
-                            | "Price" -> item.Price.ToString("F2")
-                            | "LineSubTotal" -> item.LineSubTotal.ToString("F2")
-                            | "LineTaxTotal" -> item.LineTaxTotal.ToString("F2")
-                            | "LineTotal" -> item.LineTotal.ToString("F2")
+                            | "SKU" -> item.SKU |> Sku.value
+                            | "Quantity" -> item.Quantity |> PositiveInt.value |> string
+                            | "Price" -> item.Price |> PositiveDecimal.value |> sprintf "%.2f"
+                            | "LineSubTotal" -> item.LineSubTotal |> PositiveDecimal.value |> sprintf "%.2f"
+                            | "LineTaxTotal" -> item.LineTaxTotal |> NonNegativeDecimal.value |> sprintf "%.2f"
+                            | "LineTotal" -> item.LineTotal |> PositiveDecimal.value |> sprintf "%.2f"
                             | field when Regex.IsMatch(field, @"LineTax\[\d+\]\.") ->
                                 let taxMatch = Regex.Match(field, @"LineTax\[(\d+)\]\.(.+)")
                                 let taxIndex = int taxMatch.Groups.[1].Value
@@ -374,8 +249,8 @@ module CsvXForm =
                                     let tax = item.LineTaxes.[taxIndex]
 
                                     match taxMatch.Groups.[2].Value with
-                                    | "Jurisdiction" -> tax.Jurisdiction
-                                    | "Amount" -> tax.Amount.ToString("F2")
+                                    | "Jurisdiction" -> tax.Jurisdiction |> NonEmptyString.value
+                                    | "Amount" -> tax.Amount |> NonNegativeDecimal.value |> sprintf "%.2f"
                                     | _ -> ""
                                 else
                                     ""
@@ -389,20 +264,39 @@ module CsvXForm =
             printfn ""
 
 
-open CsvXForm
+module Program =
+    open CsvProcessor
+    open Models
 
-[<EntryPoint>]
-let main argv =
-    if argv.Length <> 1 then
-        printfn "Usage: CsvXForm <path_to_csv_file>"
-        1
-    else
-        let filePath = argv.[0]
-
-        try
-            let orders = readVerticalCsv filePath
-            displayHorizontalTable orders
-            0
-        with ex ->
-            printfn "Error: %s" ex.Message
+    [<EntryPoint>]
+    let main argv =
+        if argv.Length < 1 || argv.Length > 2 then
+            printfn "Usage: CsvXForm <path_to_csv_file> [format]"
+            printfn "  format: horizontal (default) or vertical"
             1
+        else
+            let filePath = argv.[0]
+
+            let format =
+                if argv.Length > 1 then
+                    argv.[1].ToLowerInvariant()
+                else
+                    "horizontal"
+
+            try
+                let result =
+                    match format with
+                    | "vertical" -> readVerticalCsv filePath
+                    | _ -> readHorizontalCsv filePath // Default to horizontal
+
+                match result with
+                | Ok orders ->
+                    displayHorizontalTable orders
+                    printfn "CSV processed successfully."
+                    0
+                | Error error ->
+                    printfn "Error: %s" error
+                    1
+            with ex ->
+                printfn "Error: %s" ex.Message
+                1

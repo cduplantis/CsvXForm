@@ -1,5 +1,6 @@
 Field,Order1,Order2
 OrderID,ORD001,ORD002
+Customer.Id,CUST-001,CUST-002
 Customer.Name,John Doe,Jane Smith
 Customer.Email,john@example.com,jane@example.com
 Customer.Phone,555-123-4567,555-987-6543

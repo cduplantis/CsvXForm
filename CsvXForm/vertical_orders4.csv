@@ -1,6 +1,6 @@
 Field,Order1,Order2,Order3
 OrderID,ORD-X001,ORD-X002,ORD-X003
-Customer.ID,CUST-001,CUST-002,CUST-003
+Customer.Id,CUST-001,CUST-002,CUST-003
 Customer.Name,Michael Chen,Sarah Johnson,Raj Patel
 Customer.Email,michael@example.com,sarah@example.com,raj@example.com
 Customer.Phone,555-111-3333,555-222-4444,555-333-5555
